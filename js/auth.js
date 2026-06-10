@@ -23,13 +23,13 @@ btnRegister.addEventListener('click', async() => {
         password: password,
     })
     if (error) {
-        showMessage('Бүртгэл амжилтгүй: ${error.message}', "text-danger")
+        showMessage("Бүртгэл амжилтгүй: ${error.message}", "text-danger")
     } else {
         showMessage("Бүртгэл амжилттай! Та нэвтрэх товчийг дарж орно уу.", "text-success")
         passwordInput.value = ""
     }
     })
-    authForm.addEventListener('submit',async (e) =>{
+    authForm.addEventListener("submit",async (e) =>{
         e.preventDefault()
 
         const email = emailInput.value
@@ -42,12 +42,12 @@ btnRegister.addEventListener('click', async() => {
 
 
         if (error) {
-        showMessage('Нэвтрэх алдаа: ${error.message}', "text-danger")
+        showMessage("Нэвтрэх алдаа: ${error.message}", "text-danger")
             } else {
         showMessage("Амжилттай нэвтэрлээ!", "text-success")
 
         setTimeout(() => {
-            window.location.href = 'dashboard.html'
+            window.location.href = "dashboard.html"
         }, 1500)
     }
     
