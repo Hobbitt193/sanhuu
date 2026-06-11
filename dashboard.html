@@ -15,6 +15,11 @@
                 <i class="fa-solid fa-sack-dollar text-warning me-2"></i>Санхүүгийн самбар
             </a>
             <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-outline-warning fw-bold" 
+    type="button" data-bs-toggle="offcanvas" 
+    data-bs-target="#offcanvasBadges">
+    🏆 Цол
+</button>
 
 <button class="btn btn-sm btn-outline-primary fw-bold text-white border-primary-subtle" 
 type="button" data-bs-toggle="offcanvas" 
@@ -102,6 +107,8 @@ data-bs-target="#offcanvasBudget">Төсөв тогтоох</button>
                 </div>
             </div>
 
+
+
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm p-4">
                     <h5 class="fw-bold mb-3">Гүйлгээний Түүх</h5>
@@ -128,10 +135,9 @@ data-bs-target="#offcanvasBudget">Төсөв тогтоох</button>
         </div> 
     </div> 
 
+
+
     
-
-
-
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasBudget" aria-labelledby="offcanvasBudgetLabel">    
         <div class="offcanvas-header bg-dark text-white">
             <h5 class="offcanvas-title fw-bold" id="offcanvasBudgetLabel">
@@ -185,6 +191,34 @@ data-bs-target="#offcanvasBudget">Төсөв тогтоох</button>
             </div>
         </div>
     </div>
+    <!-- BADGE OFFCANVAS -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasBadges">
+    <div class="offcanvas-header bg-dark text-white">
+        <h5 class="offcanvas-title fw-bold">🏆 Миний Badge-үүд</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-4">
+        <p class="text-secondary small mb-3">
+            Санхүүгийн зорилтуудаа биелүүлж badge цуглуул!
+        </p>
+        <!-- Боломжит badge-үүдийн жагсаалт -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-secondary small text-uppercase mb-2">Боломжит Badge-үүд</h6>
+            <div class="d-flex flex-column gap-2">
+                <div class="p-2 rounded bg-light border small">🥇 <b>Анхны алхам</b> — 1 гүйлгээ бүртгэх</div>
+                <div class="p-2 rounded bg-light border small">💰 <b>Хэмнэгч</b> — Орлого > Зарлага байх</div>
+                <div class="p-2 rounded bg-light border small">🎯 <b>Төсөвч</b> — 1 төсөв тогтоох</div>
+                <div class="p-2 rounded bg-light border small">🔥 <b>Идэвхтэй</b> — 10+ гүйлгээ бүртгэх</div>
+                <div class="p-2 rounded bg-light border small">👑 <b>Мастер</b> — Бүх badge цуглуулах</div>
+            </div>
+        </div>
+        <hr>
+        <h6 class="fw-bold text-dark mb-3">Миний авсан Badge-үүд:</h6>
+        <div id="badges-container" class="d-flex flex-wrap gap-2">
+            <p class="text-muted small">Ачааллаж байна...</p>
+        </div>
+    </div>
+</div>
     
     
     

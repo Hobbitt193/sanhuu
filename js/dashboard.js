@@ -7,6 +7,117 @@ const txAmountInput = document.getElementById('tx-amount');
 const txDateInput = document.getElementById('tx-date');
 const txDescInput = document.getElementById('tx-desc');
 
+// import { supabase } from "./supabase.js"; -ийн ДАРАА, DOMContentLoaded-ийн ӨМНӨ:
+
+const BADGE_DEFINITIONS = [
+    {
+        name: '🥇 Анхны алхам',
+        description: 'Анхны гүйлгээгээ бүртгэлээ!',
+        check: (transactions, budgets) => transactions.length >= 1
+    },
+    {
+        name: '💰 Хэмнэгч',
+        description: 'Орлого нь зарлагаас их байна',
+        check: (transactions, budgets) => {
+            const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+            return income > expense && expense > 0;
+        }
+    },
+    {
+        name: '🎯 Төсөвч',
+        description: 'Хамгийн багадаа 1 төсөв тогтоосон',
+        check: (transactions, budgets) => budgets.length >= 1
+    },
+    {
+        name: '🔥 Идэвхтэй',
+        description: '10 ба түүнээс дээш гүйлгээ бүртгэсэн',
+        check: (transactions, budgets) => transactions.length >= 10
+    },
+    {
+        name: '👑 Мастер',
+        description: 'Бүх badge-г цуглуулсан',
+        check: (transactions, budgets) => {
+            const income = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+            const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+            return transactions.length >= 10 && income > expense && budgets.length >= 1;
+        }
+    }
+];
+
+async function checkAndAwardBadges() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const [{ data: transactions }, { data: budgets }, { data: existingBadges }] = await Promise.all([
+        supabase.from('transactions').select('*').eq('user_id', user.id),
+        supabase.from('budgets').select('*').eq('user_id', user.id),
+        supabase.from('badges').select('badge_name').eq('user_id', user.id)
+    ]);
+
+    const existing = new Set((existingBadges || []).map(b => b.badge_name));
+    const newlyAwarded = [];
+
+    for (const badge of BADGE_DEFINITIONS) {
+        if (existing.has(badge.name)) continue;
+        if (badge.check(transactions || [], budgets || [])) {
+            const { error } = await supabase.from('badges').insert([{
+                user_id: user.id,
+                badge_name: badge.name,
+                awarded_at: new Date().toISOString()
+            }]);
+            if (!error) newlyAwarded.push(badge);
+        }
+    }
+
+    if (newlyAwarded.length > 0) {
+        newlyAwarded.forEach(b => showBadgeNotification(b.name, b.description));
+    }
+
+    await renderBadges(user.id);
+}
+
+function showBadgeNotification(name, description) {
+    const toast = document.createElement('div');
+    toast.className = 'badge-toast';
+    toast.innerHTML = `
+        <div class="badge-toast-icon">🏆</div>
+        <div>
+            <div class="badge-toast-title">Шинэ Badge авлаа!</div>
+            <div class="badge-toast-name">${name}</div>
+            <div class="badge-toast-desc">${description}</div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+}
+
+async function renderBadges(userId) {
+    const { data: badges } = await supabase
+        .from('badges').select('*')
+        .eq('user_id', userId)
+        .order('awarded_at', { ascending: true });
+
+    const container = document.getElementById('badges-container');
+    if (!container) return;
+
+    if (!badges || badges.length === 0) {
+        container.innerHTML = `<p class="text-muted small text-center py-2">Одоогоор badge байхгүй байна. Идэвхтэй байгаарай!</p>`;
+        return;
+    }
+
+    container.innerHTML = badges.map(b => `
+        <div class="badge-item" title="${b.badge_name}">
+            <span class="badge-emoji">${b.badge_name.split(' ')[0]}</span>
+            <span class="badge-label">${b.badge_name.split(' ').slice(1).join(' ')}</span>
+        </div>
+    `).join('');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     
     // Хамгийн түрүүнд хэрэглэгч нэвтэрсэн эсэхийг шалгана
@@ -24,6 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchTransactions(); 
     // Доор бичих төсвийн жагсаалтыг шинэчлэх функцийг дуудна
     if (typeof fetchBudgets === 'function') fetchBudgets();
+    await checkAndAwardBadges();
+    
 });
 
 transactionForm.addEventListener('submit', async (e) => {
@@ -156,6 +269,7 @@ async function fetchTransactions() {
     document.getElementById('total-expense').textContent = `${totalExpense.toLocaleString()} ₮`;
 
     renderTransactions(transactions);
+    await checkAndAwardBadges();
 }
 function renderTransactions(transactions) {
     const listContainer = document.getElementById('transaction-list');
@@ -309,6 +423,7 @@ budgetForm.addEventListener('submit', async (e) => {
         
         // Доор бичих төсвийн жагсаалтыг шинэчлэх функцийг дуудна
         if (typeof fetchBudgets === 'function') fetchBudgets();
+         await checkAndAwardBadges();
     }
 });
 // Хэрэглэгчийн тогтоосон төсвүүдийг уншиж, Offcanvas доор жагсаах функц
@@ -356,4 +471,3 @@ async function fetchBudgets() {
 
     budgetsContainer.innerHTML = htmlContent;
 }
-
